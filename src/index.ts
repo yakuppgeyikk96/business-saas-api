@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import { errorHandler } from "./middleware/errorHandler";
 import { NotFoundError } from "./types/error";
 
-import productRoutes from "@/routes/product.routes";
+import routes from "@/routes";
 
 dotenv.config();
 
@@ -16,7 +16,7 @@ app.use(express.json());
 
 app.use(errorHandler);
 
-app.use("/api/products", productRoutes);
+app.use("", routes);
 
 app.use((_req, _res, next) => {
   next(new NotFoundError("Route not found"));

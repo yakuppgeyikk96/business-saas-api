@@ -64,7 +64,7 @@ export class ProductService {
       ];
     }
 
-    if (category) {
+    if (category && category !== "all") {
       query.category = category;
     }
 
