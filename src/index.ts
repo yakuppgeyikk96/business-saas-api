@@ -14,9 +14,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use(errorHandler);
-
 app.use("", routes);
+
+app.use(errorHandler);
 
 app.use((_req, _res, next) => {
   next(new NotFoundError("Route not found"));

@@ -1,31 +1,34 @@
-export class AppError extends Error {
-  constructor(
-    public statusCode: number,
-    public status: string,
-    public message: string
-  ) {
+export interface ApiError extends Error {
+  statusCode: number;
+  status: string;
+}
+
+export class NotFoundError extends Error implements ApiError {
+  statusCode = 404;
+  status = "error";
+
+  constructor(message: string) {
     super(message);
-    this.statusCode = statusCode;
-    this.status = status;
-
-    Error.captureStackTrace(this, this.constructor);
+    this.name = "NotFoundError";
   }
 }
 
-export class NotFoundError extends AppError {
+export class UnauthorizedError extends Error implements ApiError {
+  statusCode = 401;
+  status = "error";
+
   constructor(message: string) {
-    super(404, "fail", message);
+    super(message);
+    this.name = "UnauthorizedError";
   }
 }
 
-export class BadRequestError extends AppError {
-  constructor(message: string) {
-    super(400, "fail", message);
-  }
-}
+export class BadRequestError extends Error implements ApiError {
+  statusCode = 400;
+  status = "error";
 
-export class UnauthorizedError extends AppError {
   constructor(message: string) {
-    super(401, "fail", message);
+    super(message);
+    this.name = "BadRequestError";
   }
 }

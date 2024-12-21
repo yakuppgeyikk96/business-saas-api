@@ -1,14 +1,18 @@
 import { IProduct } from "@/models/product.model";
+import { OrganizationRepository } from "@/repositories/organization.repository";
 import { ProductRepository } from "@/repositories/product.repository";
 import { CreateProductInput, UpdateProductInput } from "@/schemas/product";
-import { NotFoundError } from "@/types/error";
+import { NotFoundError, UnauthorizedError } from "@/types/error";
+import { OrganizationService } from "./organization.service";
 
 export class ProductService {
   private static instance: ProductService;
   private productRepository: ProductRepository;
+  private organizationService: OrganizationService;
 
   constructor() {
     this.productRepository = new ProductRepository();
+    this.organizationService = OrganizationService.getInstance();
   }
 
   public static getInstance(): ProductService {
@@ -19,15 +23,36 @@ export class ProductService {
     return ProductService.instance;
   }
 
-  async createProduct(data: CreateProductInput): Promise<IProduct> {
+  async createProduct(
+    data: CreateProductInput,
+    userId: string
+  ): Promise<IProduct> {
+    /**
+     * Check if the user has access to the organization
+     */
+    await this.organizationService.getOrganization(data.organization, userId);
+
+    /**
+     * Create the product
+     */
     return this.productRepository.create(data);
   }
 
-  async getProduct(id: string): Promise<IProduct> {
+  async getProduct(id: string, userId: string): Promise<IProduct> {
     const product = await this.productRepository.findById(id);
+
     if (!product) {
       throw new NotFoundError("Product not found");
     }
+
+    /**
+     * Check if the user has access to the product
+     */
+    await this.organizationService.getOrganization(
+      product.organization._id.toString(),
+      userId
+    );
+
     return product;
   }
 
@@ -40,6 +65,8 @@ export class ProductService {
     category?: string;
     minPrice?: number;
     maxPrice?: number;
+    organizationId: string;
+    userId: string;
   }): Promise<{
     products: IProduct[];
     total: number;
@@ -53,9 +80,18 @@ export class ProductService {
       category,
       minPrice,
       maxPrice,
+      organizationId,
+      userId,
     } = options;
 
-    const query: any = {};
+    /**
+     * If organizationId is provided, check if the user has access to the organization
+     */
+    await this.organizationService.getOrganization(organizationId, userId);
+
+    const query: any = {
+      organization: organizationId,
+    };
 
     if (search) {
       query.$or = [
@@ -90,30 +126,86 @@ export class ProductService {
     return { products, total };
   }
 
-  async updateProduct(id: string, data: UpdateProductInput): Promise<IProduct> {
-    const product = await this.productRepository.update(id, data);
+  async updateProduct(
+    id: string,
+    data: UpdateProductInput,
+    userId: string
+  ): Promise<IProduct> {
+    const product = await this.productRepository.findById(id);
+
     if (!product) {
       throw new NotFoundError("Product not found");
     }
-    return product;
+
+    /**
+     * Check if the user has access to the organization of the product
+     */
+    await this.organizationService.getOrganization(
+      product.organization._id.toString(),
+      userId
+    );
+
+    const updatedProduct = await this.productRepository.update(id, data);
+
+    if (!updatedProduct) {
+      throw new Error("Failed to update product");
+    }
+
+    return updatedProduct;
   }
 
-  async deleteProduct(id: string): Promise<IProduct> {
-    const product = await this.productRepository.delete(id);
+  async deleteProduct(id: string, userId: string): Promise<IProduct> {
+    const product = await this.productRepository.findById(id);
+
     if (!product) {
       throw new NotFoundError("Product not found");
     }
-    return product;
+
+    /**
+     * Check if the user has access to the organization of the product
+     */
+    await this.organizationService.getOrganization(
+      product.organization._id.toString(),
+      userId
+    );
+
+    const deletedProduct = await this.productRepository.delete(id);
+
+    if (!deletedProduct) {
+      throw new Error("Failed to delete product");
+    }
+
+    return deletedProduct;
   }
 
-  async updateStock(id: string, quantity: number): Promise<IProduct> {
+  async updateStock(
+    id: string,
+    quantity: number,
+    userId: string
+  ): Promise<IProduct> {
+    const existingProduct = await this.productRepository.findById(id);
+
+    if (!existingProduct) {
+      throw new NotFoundError("Product not found or insufficient stock");
+    }
+
+    /**
+     * Check if the user has access to the organization of the product
+     */
+    await this.organizationService.getOrganization(
+      existingProduct.organization.toString(),
+      userId
+    );
+
     const updatedProduct = await this.productRepository.updateStock(
       id,
       quantity
     );
+
     if (!updatedProduct) {
-      throw new Error("Product not found or insufficient stock");
+      throw new Error("Failed to update stock");
     }
+
     return updatedProduct;
   }
 }

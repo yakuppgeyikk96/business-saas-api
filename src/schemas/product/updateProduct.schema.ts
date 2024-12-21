@@ -10,5 +10,6 @@ export const updateProductSchema = z.object({
     description: z.string().min(10).optional(),
     category: z.string().optional(),
     stock: z.number().min(0).optional(),
+    organization: z.string().optional(),
   }),
 });

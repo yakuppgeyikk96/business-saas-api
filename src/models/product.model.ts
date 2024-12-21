@@ -6,6 +6,7 @@ export interface IProduct extends Document {
   description: string;
   category: Types.ObjectId;
   stock: number;
+  organization: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,6 +36,11 @@ const productSchema = new Schema(
       type: Number,
       required: true,
       min: 0,
+    },
+    organization: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
     },
   },
   {

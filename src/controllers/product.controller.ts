@@ -1,11 +1,15 @@
 import { asyncHandler } from "@/middleware/errorHandler";
 import { productService } from "@/services/product.service";
+import AuthRequest from "@/types/auth/AuthRequest";
 import createApiResponse from "@/utils/createApiResponse";
-import { Request, Response } from "express";
+import { Response } from "express";
 
 export const productController = {
-  createProduct: asyncHandler(async (req: Request, res: Response) => {
-    const product = await productService.createProduct(req.body);
+  createProduct: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const bodyData = req.body;
+    const userId = req.user!.id;
+
+    const product = await productService.createProduct(bodyData, userId);
     const response = createApiResponse(
       "success",
       product,
@@ -14,8 +18,12 @@ export const productController = {
     res.status(201).json(response);
   }),
 
-  getProduct: asyncHandler(async (req: Request, res: Response) => {
-    const product = await productService.getProduct(req.params.id);
+  getProduct: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const productId = req.params.id;
+    const userId = req.user!.id;
+
+    const product = await productService.getProduct(productId, userId);
+
     const response = createApiResponse(
       "success",
       product,
@@ -24,7 +32,7 @@ export const productController = {
     res.json(response);
   }),
 
-  getAllProducts: asyncHandler(async (req: Request, res: Response) => {
+  getAllProducts: asyncHandler(async (req: AuthRequest, res: Response) => {
     const {
       page = 1,
       limit = 10,
@@ -34,7 +42,10 @@ export const productController = {
       category,
       minPrice,
       maxPrice,
+      organizationId,
     } = req.query;
+
+    const userId = req.user!.id;
 
     const { products, total } = await productService.getAllProducts({
       page: Number(page),
@@ -45,6 +56,8 @@ export const productController = {
       category: category as string,
       minPrice: minPrice ? Number(minPrice) : undefined,
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      organizationId: organizationId as string,
+      userId,
     });
     const response = createApiResponse(
       "success",
@@ -59,23 +72,40 @@ export const productController = {
     res.json(response);
   }),
 
-  updateProduct: asyncHandler(async (req: Request, res: Response) => {
-    const product = await productService.updateProduct(req.params.id, req.body);
+  updateProduct: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const productId = req.params.id;
+    const data = req.body;
+    const userId = req.user!.id;
+
+    const product = await productService.updateProduct(productId, data, userId);
     res.json(
       createApiResponse("success", product, "Product updated successfully")
     );
   }),
 
-  deleteProduct: asyncHandler(async (req: Request, res: Response) => {
-    await productService.deleteProduct(req.params.id);
+  deleteProduct: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const productId = req.params.id;
+    const userId = req.user!.id;
+
+    await productService.deleteProduct(productId, userId);
+
     res.json(
       createApiResponse("success", null, "Product deleted successfully")
     );
   }),
 
-  updateStock: asyncHandler(async (req: Request, res: Response) => {
+  updateStock: asyncHandler(async (req: AuthRequest, res: Response) => {
     const { quantity } = req.body;
-    const product = await productService.updateStock(req.params.id, quantity);
+
+    const productId = req.params.id;
+    const userId = req.user!.id;
+
+    const product = await productService.updateStock(
+      productId,
+      quantity,
+      userId
+    );
+
     res.json(
       createApiResponse(
         "success",

@@ -25,5 +25,8 @@ export const createProductSchema = z.object({
         required_error: "Stock is required",
       })
       .min(0, "Stock must be greater than or equal to 0"),
+    organization: z.string({
+      required_error: "User id is required",
+    }),
   }),
 });

@@ -21,7 +21,9 @@ export class ProductRepository {
   }
 
   async findById(id: string): Promise<IProduct | null> {
-    return ProductModel.findById(id).populate("category");
+    return ProductModel.findById(id)
+      .populate("category")
+      .populate("organization");
   }
 
   async delete(id: string): Promise<IProduct | null> {
@@ -38,7 +40,9 @@ export class ProductRepository {
 
   async findAll(options: FindAllOptions): Promise<IProduct[]> {
     const { query, sort, skip, limit } = options;
-    let findQuery = ProductModel.find(query).populate("category");
+    let findQuery = ProductModel.find(query)
+      .populate("category")
+      .populate("organization");
 
     if (sort) {
       const sortCriteria: { [key: string]: SortOrder } = {};
