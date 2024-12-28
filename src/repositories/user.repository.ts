@@ -3,7 +3,7 @@ import IUser from "@/types/user/IUser";
 
 export class UserRepository {
   async create(
-    data: Pick<IUser, "email" | "password" | "name">
+    data: Pick<IUser, "email" | "password" | "name" | "userType">
   ): Promise<IUser> {
     return UserModel.create(data);
   }

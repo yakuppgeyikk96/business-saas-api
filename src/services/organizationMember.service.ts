@@ -85,10 +85,8 @@ export class OrganizationMemberService {
     } = options || {};
 
     const query = { organization: organizationId };
-    console.log("Service - query:", query);
 
     const total = await this.organizationMemberRepository.count(query);
-    console.log("Service - total count:", total);
 
     const members = await this.organizationMemberRepository.findAll({
       query,
@@ -96,7 +94,6 @@ export class OrganizationMemberService {
       skip: (page - 1) * limit,
       limit,
     });
-    console.log("Service - found members:", members);
 
     return { members, total };
   }

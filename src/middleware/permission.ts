@@ -5,12 +5,14 @@ import { OrganizationPermission } from "@/types/organization/Permission";
 import { organizationMemberService } from "@/services/organizationMember.service";
 
 export const hasPermission = (permission: OrganizationPermission) => {
-  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+  return async (req: AuthRequest, _res: Response, next: NextFunction) => {
+    console.log(req.params);
     try {
       const organizationId =
         req.body.organization ||
         req.query.organizationId ||
-        req.params.organizationId;
+        req.params.organizationId ||
+        req.params.id;
 
       if (!organizationId) {
         throw new Error("Organization ID is required");

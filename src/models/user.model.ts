@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import IUser from "@/types/user/IUser";
-import UserType from "@/enums/user/UserType";
+import { UserType } from "@/types/user/UserType";
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: Object.values(UserType),
     required: true,
-    default: UserType.CUSTOMER,
+    default: UserType.INDIVIDUAL,
   },
 });
 

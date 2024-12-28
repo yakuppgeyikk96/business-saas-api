@@ -5,13 +5,16 @@ import CreateOrganizationData from "@/types/organization/CreateOrganizationData"
 import IOrganization from "@/types/organization/IOrganization";
 import { organizationMemberService } from "./organizationMember.service";
 import { OrganizationRole } from "@/types/organization/Role";
+import { OrganizationMemberRepository } from "@/repositories/organizationMember.repository";
 
 export class OrganizationService {
   private static instance: OrganizationService;
   private organizationRepository: OrganizationRepository;
+  private organizationMemberRepository: OrganizationMemberRepository;
 
   constructor() {
     this.organizationRepository = new OrganizationRepository();
+    this.organizationMemberRepository = new OrganizationMemberRepository();
   }
 
   /**
@@ -49,19 +52,21 @@ export class OrganizationService {
 
   /**
    * Get organization by id and check if the user has access to it
-   * @param id
-   * @param userId
-   * @returns
    */
   async getOrganization(id: string, userId: string): Promise<IOrganization> {
+    const membership =
+      await organizationMemberService.findByOrganizationAndUser(id, userId);
+
+    if (!membership) {
+      throw new UnauthorizedError(
+        "You do not have access to this organization"
+      );
+    }
+
     const organization = await this.organizationRepository.findById(id);
 
     if (!organization) {
       throw new NotFoundError("Organization not found");
-    }
-
-    if (organization.owner.toString() !== userId) {
-      throw new UnauthorizedError("You don't have access to this organization");
     }
 
     return organization;
@@ -69,8 +74,6 @@ export class OrganizationService {
 
   /**
    * Get all organizations owned by a user
-   * @param userId
-   * @returns
    */
   async getUserOrganizations(userId: string): Promise<IOrganization[]> {
     return await this.organizationRepository.findByOwner(userId);
@@ -78,21 +81,16 @@ export class OrganizationService {
 
   /**
    * Update an organization
-   * @param id
-   * @param userId
-   * @param data
-   * @returns
    */
   async updateOrganization(
     id: string,
     userId: string,
     data: UpdateOrganizationInput
   ): Promise<IOrganization> {
-    const organization = await this.getOrganization(id, userId);
-
-    if (!organization) {
-      throw new NotFoundError("Organization not found");
-    }
+    /**
+     * Check if the user has access to the organization
+     */
+    await this.getOrganization(id, userId);
 
     const updatedOrganization = await this.organizationRepository.update(
       id,
@@ -108,16 +106,14 @@ export class OrganizationService {
 
   /**
    * Delete an organization
-   * @param id
-   * @param userId
-   * @returns
    */
   async deleteOrganization(id: string, userId: string): Promise<IOrganization> {
-    const organization = await this.getOrganization(id, userId);
+    /**
+     * Check user has access to the organization
+     */
+    await this.getOrganization(id, userId);
 
-    if (!organization) {
-      throw new NotFoundError("Organization not found");
-    }
+    await this.organizationMemberRepository.deleteMany({ organization: id });
 
     const deletedOrganization = await this.organizationRepository.delete(id);
 

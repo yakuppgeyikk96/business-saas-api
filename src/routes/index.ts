@@ -1,8 +1,6 @@
-import productRoutes from "@/routes/product.routes";
-import categoryRoutes from "@/routes/category.routes";
-import authRoutes from "@/routes/auth.routes";
-import organizationRoutes from "@/routes/organization.routes";
-import organizationMemberRoutes from "@/routes/organizationMember.routes";
+import authRoutes from "@/routes/business/auth.routes";
+import businessRoutes from "@/routes/business";
+import ecommerceRoutes from "@/routes/ecommerce";
 import { Router } from "express";
 
 const router = Router();
@@ -13,20 +11,12 @@ const routes = [
     route: authRoutes,
   },
   {
-    path: "/products",
-    route: productRoutes,
+    path: "/business",
+    route: businessRoutes,
   },
   {
-    path: "/categories",
-    route: categoryRoutes,
-  },
-  {
-    path: "/organizations",
-    route: organizationRoutes,
-  },
-  {
-    path: "/organization-members",
-    route: organizationMemberRoutes,
+    path: "/ecommerce",
+    route: ecommerceRoutes,
   },
 ];
 

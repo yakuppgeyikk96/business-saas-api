@@ -10,6 +10,9 @@ export enum OrganizationPermission {
   UPDATE_PRODUCT = "update_product",
   DELETE_PRODUCT = "delete_product",
   MANAGE_SETTINGS = "manage_settings",
+  VIEW_ORGANIZATION = "view_organization",
+  UPDATE_ORGANIZATION = "update_organization",
+  DELETE_ORGANIZATION = "delete_organization",
 }
 
 export const RolePermissions = {
@@ -23,6 +26,9 @@ export const RolePermissions = {
     OrganizationPermission.CREATE_PRODUCT,
     OrganizationPermission.UPDATE_PRODUCT,
     OrganizationPermission.DELETE_PRODUCT,
+    OrganizationPermission.VIEW_ORGANIZATION,
+    OrganizationPermission.UPDATE_ORGANIZATION,
+    OrganizationPermission.DELETE_ORGANIZATION,
   ],
   [OrganizationRole.EDITOR]: [
     OrganizationPermission.VIEW_MEMBERS,

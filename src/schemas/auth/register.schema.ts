@@ -1,4 +1,6 @@
+// schemas/auth/register.schema.ts
 import { z } from "zod";
+import { UserType } from "@/types/user/UserType";
 
 export const registerSchema = z.object({
   body: z.object({
@@ -17,6 +19,9 @@ export const registerSchema = z.object({
         required_error: "Password is required",
       })
       .min(6, "Password must be at least 6 characters"),
+    userType: z.nativeEnum(UserType, {
+      required_error: "User type is required",
+    }),
   }),
 });
 

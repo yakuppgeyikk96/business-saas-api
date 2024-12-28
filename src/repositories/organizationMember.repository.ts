@@ -72,6 +72,10 @@ export class OrganizationMemberRepository {
     return OrganizationMemberModel.findByIdAndDelete(id);
   }
 
+  async deleteMany(query: any): Promise<void> {
+    await OrganizationMemberModel.deleteMany(query);
+  }
+
   async findByOrganizationAndUser(
     organizationId: string,
     userId: string

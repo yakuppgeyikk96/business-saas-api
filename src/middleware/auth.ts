@@ -1,5 +1,6 @@
 import AuthRequest from "@/types/auth/AuthRequest";
 import { UnauthorizedError } from "@/types/error";
+import { UserType } from "@/types/user/UserType";
 import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
 
@@ -17,7 +18,9 @@ export const auth = async (
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!);
 
-    req.user = decoded as { id: string };
+    console.log(decoded);
+
+    req.user = decoded as { id: string; userType: UserType };
 
     next();
   } catch (error) {

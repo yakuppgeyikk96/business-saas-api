@@ -1,3 +1,4 @@
+// schemas/auth/login.schema.ts
 import { z } from "zod";
 
 export const loginSchema = z.object({
@@ -9,6 +10,9 @@ export const loginSchema = z.object({
       .email("Invalid email format"),
     password: z.string({
       required_error: "Password is required",
+    }),
+    websiteType: z.enum(["business", "ecommerce"], {
+      required_error: "Website type is required",
     }),
   }),
 });
